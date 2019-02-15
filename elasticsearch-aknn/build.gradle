@@ -7,16 +7,19 @@ buildscript {
   }
 
   dependencies {
-    classpath "org.elasticsearch.gradle:build-tools:6.2.4"
+      classpath "org.elasticsearch.gradle:build-tools:6.5.1"
   }
 }
 
 group = 'org.elasticsearch.plugin.aknn'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'elasticsearch.esplugin'
 apply plugin: 'idea'
+
+// Required for ES5.6
+//ext.projectSubstitutions = [:]
 
 // license of this project
 licenseFile = rootProject.file('LICENSE.txt')
