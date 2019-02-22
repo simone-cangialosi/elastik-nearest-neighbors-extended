@@ -22,7 +22,7 @@
 All original REST endpoints should work just like before, examples for new endpoints would be added later.
    
 ### Precompiled release:
-This fork was originally compiled and tested for ES 6.5.1, but it should work for es 6.4.1-6.5.4. So I added precompiled plugins for all these ES versions. (6.4.0 should work too, but I just forget to compile it).
+This fork was originally compiled and tested for ES 6.5.1, but it should work for es 6.4.1-6.5.4. So I have added [precompiled](https://github.com/SthPhoenix/elastik-nearest-neighbors/releases) plugins for all these ES versions. (6.4.0 should work too, but I just forget to compile it).
 
 ***
 _Original readme_
