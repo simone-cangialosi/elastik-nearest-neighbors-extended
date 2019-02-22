@@ -1,3 +1,31 @@
+## Changes to original version:
+
+### Added new REST endpoints:
+
+1. **`_aknn_search_vec`** - hybrid of original `_aknn_search` and `_aknn_index` endpoints: it accepts JSON with single `_aknn_doc`, builds hashes for `_aknn_vector` and using them for building ES query and returning hits just like original `_aknn_search` endpoint.
+2. **`_aknn_clear_cache`** - clear LSH model cache on target node, usefull if you are using index name or other readable names as models `_id`
+
+### Added new request arguments:
+1. **rescore (_boolean_)** - switches on/off final L2 metric based scoring. In some cases improves search speed at 10x, while maintaining acceptable recall. (some tweaks to index mapping are required to preserve high recall)
+2. **debug (_boolean_)** - keep original vectors and hashes if set to true, usefull for tinkering with metrics and scoring, also might be usefull for clustering query results.
+3. **minimum_should_match (_integer_)** - changing corresponding ES bool query argument, might improve search speed by lowering number of hits ES should score.
+4. **filter (_string_)** - ES [bool query](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/query-filter-context.html) filter as string. Is a string you would normaly put inside a filter clause, i.e if your filter looks like this: 
+     ```
+    "filter":{ 
+        "term":  { 
+               "status": "published" 
+           }
+     } 
+     ```
+   You should put `{ "term":  { "status": "published" }}` in filter argument.
+   
+All original REST endpoints should work just like before, examples for new endpoints would be added later.
+   
+### Precompiled release:
+This fork was originally compiled and tested for ES 6.5.1, but it should work for es 6.4.1-6.5.4. So I added precompiled plugins for all these ES versions. (6.4.0 should work too, but I just forget to compile it).
+
+***
+
 # ElastiK Nearest Neighbors
 
 [Insight Data Engineering](https://www.insightdataengineering.com/) Project, Boston, April - June 2018
