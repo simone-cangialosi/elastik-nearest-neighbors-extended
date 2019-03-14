@@ -2,7 +2,34 @@
 
 ### Added new REST endpoints:
 
-1. **`_aknn_search_vec`** - hybrid of original `_aknn_search` and `_aknn_index` endpoints: it accepts JSON with single `_aknn_doc`, builds hashes for `_aknn_vector` and using them for building ES query and returning hits just like original `_aknn_search` endpoint.
+1. **`_aknn_search_vec`** - hybrid of original `_aknn_search` and `_aknn_index` endpoints: it accepts JSON with query vector, builds hashes for `_aknn_vector` and using them for building ES query and returning hits just like original `_aknn_search` endpoint.
+
+     Usage example:
+     ```
+     POST <elasticsearch host>:9200/_aknn_search_vec?rescore=true&debug=false&minimum_should_match=3&clear_cache=false
+     {
+         "_index":       "twitter_images",
+         "_type":        "_doc",
+         "_aknn_uri":    "aknn_models/_doc/twitter_images"
+         "query_aknn": {
+                 "_aknn_vector": [0.12, 0.23, ...],
+                 "k1":1000,
+                 "k2":100
+          }, 
+          "filter":{
+               "range":{
+                  "post_date":{
+                         "gte":"now-1d"
+                  }  
+               }
+          }
+     }
+     ```
+     
+     `filter` in example above is used for filtering data before executing similarity search. 
+
+
+
 2. **`_aknn_clear_cache`** - clear LSH model cache on target node, usefull if you are using index name or other readable names as models `_id`
 
 ### Added new request arguments:
