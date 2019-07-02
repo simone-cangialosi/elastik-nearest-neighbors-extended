@@ -67,6 +67,7 @@ public class AknnRestAction extends BaseRestHandler {
     private final String VECTOR_KEY = "_aknn_vector";
     private final Integer K1_DEFAULT = 99;
     private final Integer K2_DEFAULT = 10;
+    private final String DISTANCE_DEFAULT = "euclidean";
     private final Boolean RESCORE_DEFAULT = true;
     private final Integer MINIMUM_DEFAULT = 1;
 	
@@ -102,6 +103,21 @@ public class AknnRestAction extends BaseRestHandler {
             return handleCreateRequest(restRequest, client);
     }
 
+    private Double calculateScore(List<Double> queryVector, List<Double> hitVector, String distance) {
+
+        double score;
+
+        switch(distance) {
+            case "cosine": score = cosineDistance(queryVector, hitVector);
+                break;
+            case "euclidean": score = euclideanDistance(queryVector, hitVector);
+                break;
+            default: throw new RuntimeException("Invalid distance type: " + distance);
+        }
+
+        return score;
+    }
+
     public static Double euclideanDistance(List<Double> A, List<Double> B) {
         Double squaredDistance = 0.;
         for (Integer i = 0; i < A.size(); i++)
@@ -109,6 +125,20 @@ public class AknnRestAction extends BaseRestHandler {
         return Math.sqrt(squaredDistance);
     }
 
+    private static Double cosineDistance(List<Double> A, List<Double> B) {
+
+        double dotProduct = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+
+        for (int i = 0; i < A.size(); i++) {
+            dotProduct += A.get(i) * B.get(i);
+            normA += Math.pow(A.get(i), 2);
+            normB += Math.pow(B.get(i), 2);
+        }
+
+        return 1.0 - dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
 
 	// Loading LSH model refactored as function
     //TODO Fix issues with stopwatch 
@@ -142,8 +172,19 @@ public class AknnRestAction extends BaseRestHandler {
         return lshModel;
     }
 
-	//  Query execution refactored as function and added wrapper query
-    private List<Map<String, Object>> QueryLsh(List<Double> queryVector, Map<String, Long> queryHashes, String index, String type, Integer k1, Boolean rescore, String filterString, Integer minimum_should_match, Boolean debug, NodeClient client) {
+    //  Query execution refactored as function and added wrapper query
+    private List<Map<String, Object>> QueryLsh(List<Double> queryVector,
+                                               Map<String, Long> queryHashes,
+                                               String index,
+                                               String type,
+                                               Integer k1,
+                                               Boolean rescore,
+                                               String distance,
+                                               String filterString,
+                                               Integer minimum_should_match,
+                                               Boolean debug,
+                                               NodeClient client) {
+
         // Retrieve the documents with most matching hashes. https://stackoverflow.com/questions/10773581
         StopWatch stopWatch = new StopWatch("StopWatch to query LSH cache");
         logger.info("Build boolean query from hashes");
@@ -183,7 +224,7 @@ public class AknnRestAction extends BaseRestHandler {
 
         // Compute exact KNN on the approximate neighbors.
         // Recreate the SearchHit structure, but remove the vector and hashes.
-        logger.info("Compute exact distance and construct search hits");
+        logger.info("Compute exact distance and construct search hits. Distance function: " + distance);
         stopWatch.start("Compute exact distance and construct search hits");
         List<Map<String, Object>> modifiedSortedHits = new ArrayList<>();
         for (SearchHit hit : approximateSearchResponse.getHits()) {
@@ -199,7 +240,7 @@ public class AknnRestAction extends BaseRestHandler {
                     put("_index", hit.getIndex());
                     put("_id", hit.getId());
                     put("_type", hit.getType());
-                    put("_score", euclideanDistance(queryVector, hitVector));
+                    put("_score", calculateScore(queryVector, hitVector, distance));
                     put("_source", hitSource);
                 }});
             } else {
@@ -257,6 +298,7 @@ public class AknnRestAction extends BaseRestHandler {
         final String filter = restRequest.param("filter", null);
         final Integer k1 = restRequest.paramAsInt("k1", K1_DEFAULT);
         final Integer k2 = restRequest.paramAsInt("k2", K2_DEFAULT);
+        final String distance = restRequest.param("distance", DISTANCE_DEFAULT);
         final Integer minimum_should_match = restRequest.paramAsInt("minimum_should_match", MINIMUM_DEFAULT);
         final Boolean rescore = restRequest.paramAsBoolean("rescore", RESCORE_DEFAULT);
         final Boolean debug = restRequest.paramAsBoolean("debug", false);
@@ -280,7 +322,9 @@ public class AknnRestAction extends BaseRestHandler {
         stopWatch.stop();
 
         stopWatch.start("Query nearest neighbors");
-        List<Map<String, Object>> modifiedSortedHits = QueryLsh(queryVector, queryHashes, index, type, k1, rescore, filter, minimum_should_match, debug, client);
+        List<Map<String, Object>> modifiedSortedHits =
+                QueryLsh(queryVector, queryHashes, index, type, k1, rescore, distance, filter, minimum_should_match,
+                        debug, client);
 
         stopWatch.stop();
 
@@ -357,6 +401,7 @@ public class AknnRestAction extends BaseRestHandler {
         final Boolean rescore = restRequest.paramAsBoolean("rescore", RESCORE_DEFAULT);
         final Boolean clear_cache = restRequest.paramAsBoolean("clear_cache", false);
         final Boolean debug = restRequest.paramAsBoolean("debug", false);
+        final String distance = restRequest.param("distance", DISTANCE_DEFAULT);
 
         @SuppressWarnings("unchecked")
         List<Double> queryVector = (List<Double>) aknnQueryMap.get(VECTOR_KEY);
@@ -375,7 +420,9 @@ public class AknnRestAction extends BaseRestHandler {
         //logger.info("HASHES: {}", queryHashes);
 
 
-        List<Map<String, Object>> modifiedSortedHits = QueryLsh(queryVector, queryHashes, index, type, k1, rescore, filter, minimum_should_match, debug, client);
+        List<Map<String, Object>> modifiedSortedHits = QueryLsh(queryVector, queryHashes, index, type, k1, rescore,
+                distance, filter, minimum_should_match, debug, client);
+
         stopWatch.stop();
         logger.info("Timing summary\n {}", stopWatch.prettyPrint());
         return channel -> {
