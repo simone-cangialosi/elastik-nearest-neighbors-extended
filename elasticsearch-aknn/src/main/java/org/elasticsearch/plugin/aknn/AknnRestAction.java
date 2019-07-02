@@ -34,11 +34,7 @@ import org.elasticsearch.common.Strings;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
-import org.elasticsearch.rest.BaseRestHandler;
-import org.elasticsearch.rest.BytesRestResponse;
-import org.elasticsearch.rest.RestController;
-import org.elasticsearch.rest.RestRequest;
-import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.rest.*;
 import org.elasticsearch.search.SearchHit;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,16 +85,19 @@ public class AknnRestAction extends BaseRestHandler {
 
     @Override
     protected RestChannelConsumer prepareRequest(RestRequest restRequest, NodeClient client) throws IOException {
-        if (restRequest.path().endsWith(NAME_SEARCH_VEC))
-            return handleSearchVecRequest(restRequest, client);
-        else if (restRequest.path().endsWith(NAME_SEARCH))
+
+        String path = restRequest.path();
+
+        if (path.endsWith(NAME_SEARCH))
             return handleSearchRequest(restRequest, client);
-        else if (restRequest.path().endsWith(NAME_INDEX))
+        else if (path.endsWith(NAME_SEARCH_VEC))
+            return handleSearchVecRequest(restRequest, client);
+        else if (path.endsWith(NAME_INDEX))
             return handleIndexRequest(restRequest, client);
-        else if (restRequest.path().endsWith(NAME_CLEAR_CACHE))
-            return handleClearRequest(restRequest, client);
-        else
+        else if (path.endsWith(NAME_CREATE))
             return handleCreateRequest(restRequest, client);
+        else
+            return handleClearRequest(restRequest, client);
     }
 
     private Double calculateScore(List<Double> queryVector, List<Double> hitVector, String distance) {
