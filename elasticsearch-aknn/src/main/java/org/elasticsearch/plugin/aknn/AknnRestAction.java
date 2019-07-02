@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 package org.elasticsearch.plugin.aknn;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -39,15 +40,13 @@ import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 import static org.elasticsearch.rest.RestRequest.Method.GET;
 import static org.elasticsearch.rest.RestRequest.Method.POST;
 
@@ -125,7 +124,7 @@ public class AknnRestAction extends BaseRestHandler {
             squaredDistance += Math.pow(A.get(i) - B.get(i), 2);
         }
 
-        return Math.sqrt(squaredDistance);
+        return sqrt(squaredDistance);
     }
 
     private static Double cosineDistance(List<Double> A, List<Double> B) {
@@ -144,7 +143,7 @@ public class AknnRestAction extends BaseRestHandler {
     }
 
     // Loading LSH model refactored as function
-    //TODO Fix issues with stopwatch 
+    // TODO Fix issues with stopwatch
     private LshModel initLsh(String aknnURI, NodeClient client) {
         LshModel lshModel;
         StopWatch stopWatch = new StopWatch("StopWatch to load LSH cache");

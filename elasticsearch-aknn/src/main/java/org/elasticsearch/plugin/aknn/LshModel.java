@@ -14,20 +14,20 @@
  * limitations under the License.
  *
  */
+
 package org.elasticsearch.plugin.aknn;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class LshModel {
+class LshModel {
 
     private Integer nbTables;
     private Integer nbBitsPerTable;
@@ -38,7 +38,7 @@ public class LshModel {
     private List<RealMatrix> normalsTransposed;
     private List<RealVector> thresholds;
 
-    public LshModel(Integer nbTables, Integer nbBitsPerTable, Integer nbDimensions, String description) {
+    LshModel(Integer nbTables, Integer nbBitsPerTable, Integer nbDimensions, String description) {
         this.nbTables = nbTables;
         this.nbBitsPerTable = nbBitsPerTable;
         this.nbDimensions = nbDimensions;
@@ -49,7 +49,7 @@ public class LshModel {
         this.thresholds = new ArrayList<>();
     }
 
-    public void fitFromVectorSample(List<List<Double>> vectorSample) {
+    void fitFromVectorSample(List<List<Double>> vectorSample) {
 
         RealMatrix vectorsA, vectorsB, midpoint, normal, vectorSampleMatrix;
         vectorSampleMatrix = MatrixUtils.createRealMatrix(vectorSample.size(), this.nbDimensions);
@@ -74,12 +74,12 @@ public class LshModel {
 
     }
 
-    public Map<String, Long> getVectorHashes(List<Double> vector) {
+    Map<String, Long> getVectorHashes(List<Double> vector) {
 
         RealMatrix xDotNT, vectorAsMatrix;
         RealVector threshold;
         Map<String, Long> hashes = new HashMap<>();
-        Long hash;
+        long hash;
         Integer i, j;
 
         // Have to convert the vector to a matrix to support multiplication below.
@@ -103,7 +103,7 @@ public class LshModel {
     }
 
     @SuppressWarnings("unchecked")
-    public static LshModel fromMap(Map<String, Object> serialized) {
+    static LshModel fromMap(Map<String, Object> serialized) {
 
         LshModel lshModel = new LshModel(
                 (Integer) serialized.get("_aknn_nb_tables"), (Integer) serialized.get("_aknn_nb_bits_per_table"),
@@ -138,14 +138,14 @@ public class LshModel {
         return lshModel;
     }
 
-    public Map<String, Object> toMap() {
+    Map<String, Object> toMap() {
         return new HashMap<String, Object>() {{
             put("_aknn_nb_tables", nbTables);
             put("_aknn_nb_bits_per_table", nbBitsPerTable);
             put("_aknn_nb_dimensions", nbDimensions);
             put("_aknn_description", description);
-            put("_aknn_midpoints", midpoints.stream().map(realMatrix -> realMatrix.getData()).collect(Collectors.toList()));
-            put("_aknn_normals", normals.stream().map(normals -> normals.getData()).collect(Collectors.toList()));
+            put("_aknn_midpoints", midpoints.stream().map(RealMatrix::getData).collect(Collectors.toList()));
+            put("_aknn_normals", normals.stream().map(RealMatrix::getData).collect(Collectors.toList()));
         }};
     }
 }

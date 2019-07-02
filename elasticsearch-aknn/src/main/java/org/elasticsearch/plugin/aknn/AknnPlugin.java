@@ -28,8 +28,7 @@ import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
-
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -40,7 +39,7 @@ public class AknnPlugin extends Plugin implements ActionPlugin {
 
     @Override
     public List<Setting<?>> getSettings() {
-        return Arrays.asList(SETTINGS);
+        return Collections.singletonList(SETTINGS);
     }
 
     @Override
@@ -51,6 +50,6 @@ public class AknnPlugin extends Plugin implements ActionPlugin {
                                              final SettingsFilter settingsFilter,
                                              final IndexNameExpressionResolver indexNameExpressionResolver,
                                              final Supplier<DiscoveryNodes> nodesInCluster) {
-        return Arrays.asList(new AknnRestAction(settings, restController));
+        return Collections.singletonList(new AknnRestAction(settings, restController));
     }
 }
