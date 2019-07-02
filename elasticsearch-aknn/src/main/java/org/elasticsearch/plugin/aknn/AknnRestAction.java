@@ -139,7 +139,8 @@ public class AknnRestAction extends BaseRestHandler {
             normB += Math.pow(B.get(i), 2);
         }
 
-        return 1.0 - dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        // Avoid negative numbers in case the cosine is > 1.0 (it could happen in case of computational approximation).
+        return max(0.0, 1.0 - dotProduct / (sqrt(normA) * sqrt(normB)));
     }
 
     // Loading LSH model refactored as function
