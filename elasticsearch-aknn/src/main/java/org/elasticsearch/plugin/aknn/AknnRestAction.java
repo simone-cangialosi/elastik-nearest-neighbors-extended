@@ -28,11 +28,9 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.DeprecationHandler;
 import org.elasticsearch.common.Strings;
-import org.elasticsearch.index.cache.IndexCache;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -54,8 +52,6 @@ import java.util.Map;
 import static java.lang.Math.min;
 import static org.elasticsearch.rest.RestRequest.Method.GET;
 import static org.elasticsearch.rest.RestRequest.Method.POST;
-
-import javax.lang.model.type.NullType;
 
 public class AknnRestAction extends BaseRestHandler {
 
