@@ -7,7 +7,7 @@
 
     <groupId>org.elasticsearch.plugin</groupId>
     <artifactId>elasticsearch-aknn</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
